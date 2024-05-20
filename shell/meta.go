@@ -80,8 +80,20 @@ func WithParameterSummary(summary string) ParamOption {
   }
 }
 
-func NewParameter(name string, opts ...ParamOption) Parameter {
-  p := Parameter{Name: name}
+func Required() ParamOption {
+  return func(p *Parameter) {
+    p.Required = true
+  }
+}
+
+func WithDefaultValue(v any) ParamOption {
+  return func(p *Parameter) {
+    p.Default = v
+  }
+}
+
+func NewParameter(name string, kind ParamKind, opts ...ParamOption) Parameter {
+  p := Parameter{Name: name, Kind: kind}
   for _, opt := range opts {
     opt(&p)
   }
@@ -89,6 +101,9 @@ func NewParameter(name string, opts ...ParamOption) Parameter {
 }
 
 type Parameter struct {
-  Name    string `json:"name"`
-  Summary string `json:"summary,omitempty"`
+  Name     string    `json:"name"`
+  Kind     ParamKind `json:"kind"`
+  Summary  string    `json:"summary,omitempty"`
+  Required bool      `json:"required,omitempty"`
+  Default  any       `json:"default"`
 }
