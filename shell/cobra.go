@@ -132,14 +132,30 @@ func asCommand(nc *nats.Conn, e *treeElement) (*cobra.Command, error) {
         switch p.Kind {
         case ParamKindString:
           ps[p.Name], err = cmd.Flags().GetString(p.Name)
+          if p.Required && ps[p.Name].(string) == "" {
+            fmt.Printf("parameter %s is required\n", p.Name)
+            return
+          }
         case ParamKindInt:
           ps[p.Name], err = cmd.Flags().GetInt(p.Name)
+          if p.Required && ps[p.Name].(int) == 0 {
+            fmt.Printf("parameter %s is required\n", p.Name)
+            return
+          }
         case ParamKindBool:
           ps[p.Name], err = cmd.Flags().GetBool(p.Name)
         case ParamKindFloat:
           ps[p.Name], err = cmd.Flags().GetFloat64(p.Name)
+          if p.Required && ps[p.Name].(float64) == 0 {
+            fmt.Printf("parameter %s is required\n", p.Name)
+            return
+          }
         case ParamKindDuration:
           ps[p.Name], err = cmd.Flags().GetDuration(p.Name)
+          if p.Required && ps[p.Name].(time.Duration) == 0 {
+            fmt.Printf("parameter %s is required\n", p.Name)
+            return
+          }
         default:
           err = fmt.Errorf("unknown parameter kind: %v", p.Kind)
         }
