@@ -2,7 +2,9 @@ package shell
 
 type Option func(map[string]string)
 
-func NewMetadata(m map[string]string, opts ...Option) map[string]string {
+func NewMetadata(opts ...Option) Metadata {
+  m := map[string]string{}
+
   for _, opt := range opts {
     opt(m)
   }
@@ -19,6 +21,14 @@ func WithSummary(summary string) Option {
 func WithDescription(desc string) Option {
   return func(m map[string]string) {
     m["_nats.shell.description"] = desc
+  }
+}
+
+func WithEntries(m map[string]string) Option {
+  return func(m map[string]string) {
+    for k, v := range m {
+      m[k] = v
+    }
   }
 }
 
