@@ -13,24 +13,31 @@ import (
 func Command(nc *nats.Conn) (*cobra.Command, error) {
   subject := fmt.Sprintf("%s.INFO", micro.APIPrefix)
 
-  resp, err := nc.Request(subject, nil, 10*time.Second)
+  resp, err := doReq(nil, subject, 0, 10*time.Second, nc)
   if err != nil {
     return nil, fmt.Errorf("failed to get API info: %w", err)
   }
 
-  var i micro.Info
-  if err := json.Unmarshal(resp.Data, &i); err != nil {
-    return nil, fmt.Errorf("failed to unmarshal API info: %w", err)
+  rootCmd := &cobra.Command{
+    Use:   "nats-shell",
+    Short: "nats-shell is a CLI for interacting with the nats micro services",
   }
 
-  cmd, err := parseInfo(i)
-  if err != nil {
-    return nil, fmt.Errorf("failed to parse API info: %w", err)
+  for _, m := range resp {
+    var i micro.Info
+    if err := json.Unmarshal(m, &i); err != nil {
+      return nil, fmt.Errorf("failed to unmarshal API info: %w", err)
+    }
+
+    cmd, err := parseInfo(i)
+    if err != nil {
+      return nil, fmt.Errorf("failed to parse API info: %w", err)
+    }
+
+    rootCmd.AddCommand(cmd)
   }
 
-  cmd.PersistentFlags().String("ctx", "", "context to use")
-
-  return cmd, nil
+  return rootCmd, nil
 }
 
 func parseInfo(info micro.Info) (*cobra.Command, error) {

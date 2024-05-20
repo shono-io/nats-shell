@@ -62,6 +62,18 @@ func (m Metadata) Description() string {
   return m["_nats.shell.description"]
 }
 
+func (m Metadata) Parameters() []Parameter {
+  ps, fnd := m["_nats.shell.parameters"]
+  if !fnd {
+    return nil
+  }
+
+  var params []Parameter
+  _ = json.Unmarshal([]byte(ps), &params)
+
+  return params
+}
+
 func WithParameterSummary(summary string) ParamOption {
   return func(p *Parameter) {
     p.Summary = summary
